@@ -149,7 +149,7 @@ sensor:
 
 Use trigger-based template sensors in `configuration.yaml` or `templates.yaml`.
 
-### Raw Sensor (Hardware Address)
+### Sensor (Hardware Address)
 
 ```yaml
 template:
@@ -173,6 +173,15 @@ template:
           last_event_received: "{{ now() }}"
 ```
 
+
+---
+
+### Sensor Management
+
+This configuration uses trigger-based template sensors with a stable `unique_id`, eliminating the need for an extra logical abstraction layer.
+
+* **UI Customization:** You can rename the sensor and change its Entity ID (e.g., to `sensor.heat_pump_1_cold_water`) directly in Home Assistant (**Settings -> Devices & Services -> Entities**) without editing YAML.
+* **Hardware Replacement:** If a physical sensor fails, simply update the 1-Wire `address` in the YAML configuration. Since the `unique_id` remains constant, the Entity ID stays the same. This ensures that your automations, dashboards, and history stats remain intact.
 
 ---
 

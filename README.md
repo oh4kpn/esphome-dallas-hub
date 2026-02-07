@@ -41,6 +41,15 @@ All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull�
 
 ---
 
+## 📊 Included Files
+
+- `esphome.yaml` – ESPHome hub configuration (example)
+- `dallas_listener_in_ha.yaml` – Home Assistant template listeners (example)
+- `ha_debug_card.yaml` – Lovelace debug card (example) 
+- `ha_debug_card.png` – Lovelace debug card UI preview (example)
+
+---
+
 ## ⚙️ ESPHome Configuration
 
 The hub uses a centralized script to package and send measurements to Home Assistant.
@@ -153,14 +162,7 @@ This allows sensor hardware replacement without changing automations.
 
 ---
 
-## 📊 Included Files
 
-- `esphome.yaml` – ESPHome hub configuration
-- `dallas_listener_in_ha.yaml` – Home Assistant template listeners
-- `ha_debug_card.yaml` – Lovelace debug card
-- `ha_debug_card.png` – Lovelace debug card UI preview
-
----
 
 ## 🔍 Troubleshooting
 

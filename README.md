@@ -161,7 +161,7 @@ This makes hardware replacement painless.
 sensor:
   - name: "Heat Pump Supply Water"
     unit_of_measurement: "°C"
-    state: "{{ states('sensor.monster_test_1') }}"
+    state: "{{ states('sensor.dallas_0x9c000000847d4828') }}"
 ```
 
 ---

@@ -1,0 +1,25 @@
+type: entities
+title: Dallas Hub - Debug Sensor
+show_header_toggle: false
+state_color: false
+entities:
+  - entity: sensor.kellarin_onewire_hub_1_vayla_1_anturi_0
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_1_anturi_1
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_1_anturi_2
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_1_anturi_3
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_2_anturi_0
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_2_anturi_1
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_2_anturi_2
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_2_anturi_3
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_3_anturi_0
+    secondary_info: last-updated
+  - entity: sensor.kellarin_onewire_hub_1_vayla_3_anturi_1
+    secondary_info: last-updated

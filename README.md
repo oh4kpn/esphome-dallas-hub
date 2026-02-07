@@ -1,14 +1,14 @@
 # ESPHome Dallas 1-Wire Hub (Event-based)
 
-This project is an **ESPHome configuration optimized for large Dallas DS18B20 temperature sensor networks**
-(e.g. 10–64+ sensors on a multiple 1-Wire busses).
+This repository contains an **ESPHome configuration optimized for large Dallas DS18B20 temperature sensor networks**
+(e.g. 10+ sensors across one or multiple 1‑Wire buses).
 
-Instead of creating a separate **Home Assistant entity for every sensor** (which consumes memory and slows down boot),
-this hub reads all sensors and sends the **raw measurements to Home Assistant as events**
-(`esphome.dallas_raw`).
+Instead of creating one Home Assistant entity per sensor (which consumes memory and slows down boot),
+this hub **reads all sensors and sends raw measurements to Home Assistant as events**
+using the `esphome.dallas_raw` event.
 
-On the Home Assistant side, **lightweight template sensors** pick up and store the data.
-This approach enables **precise timestamps**, **low ESP32 memory usage**, and a **clean, scalable data flow**.
+On the Home Assistant side, **trigger-based template sensors** receive and store the data.
+This enables precise timestamps, low ESP32 memory usage, and a scalable architecture.
 
 ---
 
@@ -18,16 +18,16 @@ This approach enables **precise timestamps**, **low ESP32 memory usage**, and a 
   No heavy Home Assistant entities stored in ESP memory.
 
 - **Accurate UTC timestamps**  
-  Every measurement includes a `measured_at` field (ISO 8601 UTC), generated at measurement time.
+  Each measurement includes `measured_at` (ISO 8601 UTC) generated at measurement time.
 
 - **SNTP synchronization status**  
-  Events include a `time_synced` flag to verify clock reliability.
+  Events include a `time_synced` flag to validate clock reliability.
 
 - **Decimal precision control**  
   Values are rounded to two decimals (`%.2f`) at the source.
 
 - **Modular & scalable design**  
-  Uses ESPHome `script` and `substitutions`, making it easy to add more sensors.
+  Uses ESPHome `script` and `substitutions` for easy expansion.
 
 ---
 
@@ -35,35 +35,33 @@ This approach enables **precise timestamps**, **low ESP32 memory usage**, and a 
 
 - ESP32 (e.g. ESP32 DevKit V1)
 - DS18B20 temperature sensors
-- 4.7kΩ pull-up resistors on the data lines
+- 4.7kΩ pull-up resistor on the data line(s)
+
+All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull‑up resistor to 3.3 V.
 
 ---
 
 ## ⚙️ ESPHome Configuration
 
-This setup uses a centralized script to package and send data to Home Assistant.
+The hub uses a centralized script to package and send measurements to Home Assistant.
 
----
-
-### 1. Definitions (Substitutions & Time)
+### 1. Substitutions & Time
 
 Force UTC time to keep Home Assistant handling clean and predictable.
 
 ```yaml
 substitutions:
-  temp_update_interval: "30s" # Global update interval
+  temp_update_interval: "30s"
 
 time:
   - platform: sntp
     id: sntp_time
-    timezone: "UTC" # Force UTC, HA converts to local time
+    timezone: "UTC"
 ```
 
 ---
 
-### 2. Script (Event dispatch logic)
-
-This script packages the measurement and fires a Home Assistant event.
+### 2. Event Dispatch Script
 
 ```yaml
 script:
@@ -78,20 +76,15 @@ script:
           data:
             address: !lambda "return sensor_address;"
             value: !lambda 'return str_sprintf("%.2f", sensor_value);'
-            hub: kellari-onewire-hub-1
-            # Is SNTP time valid?
+            hub: dallas-hub-1
             time_synced: !lambda 'return id(sntp_time).now().is_valid() ? "true" : "false";'
-            # Exact measurement time (UTC ISO 8601)
             measured_at: !lambda 'return id(sntp_time).now().strftime("%Y-%m-%dT%H:%M:%SZ");'
-      - delay: 50ms # Small delay to avoid network congestion
+      - delay: 50ms
 ```
 
 ---
 
-### 3. Sensor definition
-
-Each sensor calls the script above.  
-Note the use of `id(...)` to fetch the sensor address.
+### 3. Dallas Sensor Example
 
 ```yaml
 sensor:
@@ -119,14 +112,9 @@ sensor:
 
 ## 🏠 Home Assistant Configuration
 
-Use **trigger-based template sensors** in `configuration.yaml` or `templates.yaml`.
+Use trigger-based template sensors in `configuration.yaml` or `templates.yaml`.
 
----
-
-### Example: Raw sensor (hardware ID based)
-
-This sensor listens for `esphome.dallas_raw` events and updates only when the correct
-64-bit address appears.
+### Raw Sensor (Hardware Address)
 
 ```yaml
 template:
@@ -136,7 +124,7 @@ template:
         event_data:
           address: "0x9c000000847d4828"
     sensor:
-      - name: "Monster Test 1"
+      - name: "Dallas Sensor 0"
         unique_id: "dallas_0x9c000000847d4828"
         state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
         unit_of_measurement: "°C"
@@ -152,39 +140,38 @@ template:
 
 ---
 
-### Logical abstraction layer (Optional)
-
-You can create a clean logical sensor that references the raw one.
-This makes hardware replacement painless.
+### Logical Abstraction Layer:
 
 ```yaml
 sensor:
   - name: "Heat Pump Supply Water"
     unit_of_measurement: "°C"
-    state: "{{ states('sensor.dallas_0x9c000000847d4828') }}"
+    state: "{{ states('sensor.dallas_0x66012211281e8a28') }}"
 ```
+
+This allows sensor hardware replacement without changing automations.
+
+---
+
+## 📊 Included Files
+
+- `esphome.yaml` – ESPHome hub configuration
+- `dallas_listener_in_ha.yaml` – Home Assistant template listeners
+- `ha_debug_card.yaml` – Lovelace debug card
+- `ha_debug_card.png` – Lovelace debug card UI preview
 
 ---
 
 ## 🔍 Troubleshooting
 
-### How do I know if the clock is synced?
-Check the `time_synced` attribute.
+**Clock not synced?**  
+Check `time_synced` attribute.  
+If false, `measured_at` may be invalid (e.g. 1970).
 
-- `false` → `measured_at` is unreliable (often year 1970)
-- `true` → timestamps are valid
-
-`last_event_received` always shows when Home Assistant received the data.
-
-### Sensors not updating in Home Assistant?
-
-1. Go to **Developer Tools → Events**
-2. Listen to: `esphome.dallas_raw`
-3. If no events appear:
-   - Check ESP logs
-   - Verify Wi-Fi connectivity
-4. If events appear:
-   - Make sure the `address` in the template sensor matches exactly
+**No updates in HA?**
+1. Developer Tools → Events
+2. Listen to `esphome.dallas_raw`
+3. Verify ESP logs, Wi‑Fi, and sensor address match
 
 ---
 

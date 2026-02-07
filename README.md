@@ -46,25 +46,22 @@ All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull�
 
 ```mermaid
 graph TD
-    A["**DS18B20 Sensors**<br/>(1-Wire Bus)"]
-    
-    A -- "1-Wire" --> B
-    
-    subgraph ESP32 ["ESP32 (ESPHome)"]
-        B["**Dallas Hub**<br/>- dallas_temp<br/>- Central script<br/>- SNTP (UTC)"]
-    end
-    
-    B -- "Home Assistant Event<br/>esphome.dallas_raw<br/>(address, value, timestamps)" --> C
-    
-    subgraph HA ["Home Assistant"]
-        C["**Trigger-based Template Sensors**<br/>- Raw sensors<br/>- Logical sensors"]
-    end
-    
-    C -- "State updates" --> D["**Dashboards / Automations / History**"]
+    %% Määritellään solmut
+    Sensor["DS18B20 Sensors<br/>(1-Wire Bus)"]
+    ESP["ESP32 (ESPHome)<br/>Dallas Hub"]
+    Event["HA Event Bus<br/>(esphome.dallas_raw)"]
+    HA["Home Assistant<br/>Trigger-based Template Sensor"]
+    UI["Dashboards / InfluxDB / History"]
 
-    %% Tyylittelyä
-    style B fill:#f9f,stroke:#333,stroke-width:2px
-    style C fill:#bbf,stroke:#333,stroke-width:2px
+    %% Reitit
+    Sensor -- "1-Wire" --> ESP
+    ESP -- "Fire Event" --> Event
+    Event -- "Trigger payload:<br/>addr, value, time" --> HA
+    HA -- "State Update" --> UI
+
+    %% Hillitty tyylittely (valinnainen, toimii ilmankin)
+    classDef plain fill:#fff,stroke:#333,stroke-width:1px,color:#000;
+    class Sensor,ESP,Event,HA,UI plain
 ```
 
 
@@ -162,7 +159,7 @@ template:
         event_data:
           address: "0x9c000000847d4828"
     sensor:
-      - name: "Heat Pump 1 Cold Water In Raw"
+      - name: "Heat Pump 1 Cold Water In"
         unique_id: "dallas_0x9c000000847d4828"
         state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
         unit_of_measurement: "°C"
@@ -176,18 +173,6 @@ template:
           last_event_received: "{{ now() }}"
 ```
 
----
-
-### Optional Next Logical Abstraction Layer:
-
-```yaml
-sensor:
-  - name: "Heat Pump 1 Cold Water In"
-    unit_of_measurement: "°C"
-    state: "{{ states('sensor.heat_pump_1_cold_water_in_raw') }}"
-```
-
-This allows sensor hardware replacement without changing automations - and device based yaml templates with lambda and filtering
 
 ---
 

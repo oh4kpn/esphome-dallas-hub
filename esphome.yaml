@@ -1,0 +1,311 @@
+substitutions:
+  device_location: "Hämylä varaajahuone"
+  device_lat: "60.0"
+  device_lon: "23.0"
+  # Set update interval
+  temp_update_interval: "15s"
+
+esphome:
+  name: kellari-onewire-hub-1
+  friendly_name: "Kellarin onewire hub 1"
+
+esp32:
+  board: esp32dev
+  framework:
+    type: esp-idf
+    sdkconfig_options:
+      CONFIG_LWIP_IPV6: "y"
+      CONFIG_LWIP_IPV6_AUTOCONFIG: "y"
+
+network:
+  enable_ipv6: true
+
+packages:
+  wifi: !include common/wifi.yaml           # include my own wifi settings 
+  otaapi: !include common/otaapi.yaml       # include my own ota and api settings 
+
+logger:
+  level: VERBOSE
+
+time:
+  - platform: sntp
+    id: sntp_time
+    timezone: "UTC"  # Force UTC TZ
+    servers:
+      - ntp.netnod.se
+
+script:
+  - id: send_dallas_event
+    mode: queued
+    parameters:
+      sensor_address: string
+      sensor_value: float
+    then:
+      - homeassistant.event:
+          event: esphome.dallas_raw
+          data:
+            address: !lambda "return sensor_address;"
+            value: !lambda 'return str_sprintf("%.2f", sensor_value);'
+            hub: kellari-onewire-hub-1
+            measured_at: !lambda 'return id(sntp_time).now().strftime("%Y-%m-%dT%H:%M:%SZ");'
+            time_synced: !lambda 'return id(sntp_time).now().is_valid() ? "true" : "false";'
+      - delay: 50ms 
+
+# ==================================================
+# onewire bus conf
+# ==================================================
+one_wire:
+  - platform: gpio
+    id: ow_bus_1
+    pin: GPIO25
+  - platform: gpio
+    id: ow_bus_2
+    pin: GPIO26
+  - platform: gpio
+    id: ow_bus_3
+    pin: GPIO18
+
+# =============================================================================================================================================================
+# Sensors (Kukin lähettää oman ID:nsä perusteella)
+# generate with copypaste or perl, because for loop and scan: all are now gone
+# =============================================================================================================================================================
+
+sensor:
+  # ==================================================
+  # BUSSI 1 (GPIO25) - 4 Sensoria
+  # ==================================================
+  - platform: dallas_temp
+    one_wire_id: ow_bus_1
+    index: 0
+    id: b1_i0
+    name: "Väylä 1 Anturi 0"
+    update_interval: ${temp_update_interval}
+    force_update: true
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b1_i0).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_1
+    index: 1
+    id: b1_i1
+    name: "Väylä 1 Anturi 1"
+    update_interval: ${temp_update_interval}
+    force_update: true
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b1_i1).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_1
+    index: 2
+    id: b1_i2
+    name: "Väylä 1 Anturi 2"
+    update_interval: ${temp_update_interval}
+    force_update: true
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b1_i2).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_1
+    index: 3
+    id: b1_i3
+    name: "Väylä 1 Anturi 3"
+    update_interval: ${temp_update_interval}
+    force_update: true
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b1_i3).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  # ==================================================
+  # BUSSI 2 (GPIO26) - 4 Sensoria
+  # ==================================================
+  - platform: dallas_temp
+    one_wire_id: ow_bus_2
+    index: 0
+    id: b2_i0
+    name: "Väylä 2 Anturi 0"
+    update_interval: ${temp_update_interval}
+    force_update: true
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b2_i0).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_2
+    force_update: true
+    index: 1
+    id: b2_i1
+    name: "Väylä 2 Anturi 1"
+    update_interval: ${temp_update_interval}
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b2_i1).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_2
+    force_update: true
+    index: 2
+    id: b2_i2
+    name: "Väylä 2 Anturi 2"
+    update_interval: ${temp_update_interval}
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b2_i2).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_2
+    force_update: true
+    index: 3
+    id: b2_i3
+    name: "Väylä 2 Anturi 3"
+    update_interval: ${temp_update_interval}
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b2_i3).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  # ==================================================
+  # BUSSI 3 (GPIO18) - 2 Sensoria
+  # ==================================================
+  - platform: dallas_temp
+    one_wire_id: ow_bus_3
+    force_update: true
+    index: 0
+    id: b3_i0
+    name: "Väylä 3 Anturi 0"
+    update_interval: ${temp_update_interval}
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b3_i0).get_address_name();"
+                  sensor_value: !lambda "return x;"
+
+  - platform: dallas_temp
+    one_wire_id: ow_bus_3
+    force_update: true
+    index: 1
+    id: b3_i1
+    name: "Väylä 3 Anturi 1"
+    update_interval: ${temp_update_interval}
+    filters:
+      - filter_out: nan
+      - filter_out: 0.0
+      - filter_out: 85.0
+      - filter_out: -127.0
+    on_value:
+      then:
+        - if:
+            condition:
+              lambda: 'return !std::isnan(x);'
+            then:
+              - script.execute:
+                  id: send_dallas_event
+                  sensor_address: !lambda "return id(b3_i1).get_address_name();"
+                  sensor_value: !lambda "return x;"

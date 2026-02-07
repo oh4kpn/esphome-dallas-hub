@@ -162,7 +162,7 @@ template:
         event_data:
           address: "0x9c000000847d4828"
     sensor:
-      - name: "Dallas Sensor 0"
+      - name: "Heat Pump 1 Cold Water In Raw"
         unique_id: "dallas_0x9c000000847d4828"
         state: "{{ '%.2f' | format(trigger.event.data.value | float) }}"
         unit_of_measurement: "°C"
@@ -178,16 +178,16 @@ template:
 
 ---
 
-### Logical Abstraction Layer:
+### Optional Next Logical Abstraction Layer:
 
 ```yaml
 sensor:
-  - name: "Heat Pump Supply Water"
+  - name: "Heat Pump 1 Cold Water In"
     unit_of_measurement: "°C"
-    state: "{{ states('sensor.dallas_0x66012211281e8a28') }}"
+    state: "{{ states('sensor.heat_pump_1_cold_water_in_raw') }}"
 ```
 
-This allows sensor hardware replacement without changing automations.
+This allows sensor hardware replacement without changing automations - and device based yaml templates with lambda and filtering
 
 ---
 

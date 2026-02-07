@@ -122,7 +122,7 @@ script:
 
 ---
 
-### 3. Dallas Sensor Example
+### 3. Dallas Debug Sensor Example (remember to list all indexes and from all busses)
 
 ```yaml
 sensor:

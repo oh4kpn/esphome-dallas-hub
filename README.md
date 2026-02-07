@@ -41,6 +41,50 @@ All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull�
 
 ---
 
+## Architecture Overview
+
++-------------------+
+|   DS18B20 Sensors |
+|  (1-Wire Bus)     |
++---------+---------+
+          |
+          | 1-Wire
+          |
++---------v---------+
+|      ESP32        |
+|  ESPHome Dallas   |
+|  Hub              |
+|                   |
+| - dallas_temp     |
+| - central script  |
+| - SNTP (UTC)      |
++---------+---------+
+          |
+          | Home Assistant Event
+          | esphome.dallas_raw
+          | (address, value, timestamps)
+          |
++---------v---------+
+|  Home Assistant   |
+|                   |
+| Trigger-based     |
+| Template Sensors  |
+|                   |
+| - Raw sensors     |
+| - Logical sensors |
++---------+---------+
+          |
+          | State updates
+          |
++---------v---------+
+|  Dashboards /     |
+|  Automations /    |
+|  History / Stats  |
++-------------------+
+
+
+---
+
 ## 📊 Included Files
 
 - `esphome.yaml` – ESPHome hub configuration (example)

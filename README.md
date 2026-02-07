@@ -43,6 +43,8 @@ All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull�
 
 ## Architecture Overview
 
+
+```mermaid
 graph TD
     A["**DS18B20 Sensors**<br/>(1-Wire Bus)"]
     
@@ -63,6 +65,7 @@ graph TD
     %% Tyylittelyä
     style B fill:#f9f,stroke:#333,stroke-width:2px
     style C fill:#bbf,stroke:#333,stroke-width:2px
+```
 
 
 ---

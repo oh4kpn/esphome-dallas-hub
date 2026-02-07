@@ -1,7 +1,7 @@
 # ESPHome Dallas 1-Wire Hub (Event-based)
 
 This project is an **ESPHome configuration optimized for large Dallas DS18B20 temperature sensor networks**
-(e.g. 10–64+ sensors on a multiple 1-Wire bus).
+(e.g. 10–64+ sensors on a multiple 1-Wire busses).
 
 Instead of creating a separate **Home Assistant entity for every sensor** (which consumes memory and slows down boot),
 this hub reads all sensors and sends the **raw measurements to Home Assistant as events**

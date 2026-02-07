@@ -43,44 +43,26 @@ All DS18B20 sensors share a 1‑Wire bus connected to a GPIO pin with the pull�
 
 ## Architecture Overview
 
-+-------------------+
-|   DS18B20 Sensors |
-|  (1-Wire Bus)     |
-+---------+---------+
-          |
-          | 1-Wire
-          |
-+---------v---------+
-|      ESP32        |
-|  ESPHome Dallas   |
-|  Hub              |
-|                   |
-| - dallas_temp     |
-| - central script  |
-| - SNTP (UTC)      |
-+---------+---------+
-          |
-          | Home Assistant Event
-          | esphome.dallas_raw
-          | (address, value, timestamps)
-          |
-+---------v---------+
-|  Home Assistant   |
-|                   |
-| Trigger-based     |
-| Template Sensors  |
-|                   |
-| - Raw sensors     |
-| - Logical sensors |
-+---------+---------+
-          |
-          | State updates
-          |
-+---------v---------+
-|  Dashboards /     |
-|  Automations /    |
-|  History / Stats  |
-+-------------------+
+graph TD
+    A["**DS18B20 Sensors**<br/>(1-Wire Bus)"]
+    
+    A -- "1-Wire" --> B
+    
+    subgraph ESP32 ["ESP32 (ESPHome)"]
+        B["**Dallas Hub**<br/>- dallas_temp<br/>- Central script<br/>- SNTP (UTC)"]
+    end
+    
+    B -- "Home Assistant Event<br/>esphome.dallas_raw<br/>(address, value, timestamps)" --> C
+    
+    subgraph HA ["Home Assistant"]
+        C["**Trigger-based Template Sensors**<br/>- Raw sensors<br/>- Logical sensors"]
+    end
+    
+    C -- "State updates" --> D["**Dashboards / Automations / History**"]
+
+    %% Tyylittelyä
+    style B fill:#f9f,stroke:#333,stroke-width:2px
+    style C fill:#bbf,stroke:#333,stroke-width:2px
 
 
 ---
